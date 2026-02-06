@@ -1,12 +1,10 @@
 "use client";
-// 👇 1. Yeh line sabse important hai. Isse Build Error hat jayega.
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast, { Toaster } from 'react-hot-toast';
 
-// Main Content Component
 function HomeContent() {
   const [meetings, setMeetings] = useState([]);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
@@ -116,7 +114,7 @@ function HomeContent() {
       if (res.ok) {
         toast.success(`Email sent to ${emailInput} 🚀`, { id: toastId });
       } else {
-        toast.error("Failed to send email ❌", { id: toastId });
+        toast.error("Failed to send email", { id: toastId });
       }
     } catch (err) {
       toast.error("Network Error ⚠️", { id: toastId });
@@ -163,14 +161,14 @@ function HomeContent() {
 
       <header className="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4 gap-4">
         <div>
-           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Anapan AI Sales Agent
           </h1>
-          <p className="text-xs text-gray-400 mt-1">Automated Research & Meeting Prep</p>
+          <p className="text-1xl text-gray-400 mt-1">Automated Research & Meeting Prep</p>
         </div>
        
         <div className="flex gap-3">
-            <button onClick={handleLogin} className="text-xs text-gray-400 hover:text-white underline">
+            <button onClick={handleLogin} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-1xl transition shadow-lg">
               {userEmail ? `Synced as: ${userEmail}` : "Sync Calendar (Dev Mode)"}
             </button>
         </div>
@@ -220,7 +218,7 @@ function HomeContent() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN */}
+
         <div className="lg:col-span-8 bg-gray-800/50 rounded-xl p-6 h-full overflow-hidden flex flex-col justify-center relative">
           
           {!selectedMeeting ? (
@@ -246,7 +244,6 @@ function HomeContent() {
                 </button>
               </div>
 
-              {/* Document Content */}
               <div className="overflow-y-auto flex-1 custom-scrollbar p-2 bg-gray-900/50 rounded-lg">
                 <div 
                   id="report-content" 
@@ -326,8 +323,7 @@ function HomeContent() {
   );
 }
 
-// Wrapper Component ki zaroorat nahi ab, direct export default Home kar diya hai.
-// Kyunki `force-dynamic` use kar liya.
+
 export default function Home() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">Loading App...</div>}>

@@ -5,7 +5,6 @@ const { generateMeetingPrep } = require('../utils/agent');
 const transporter = require('../utils/emailTransporter');
 const User = require('../models/User');
 
-// 1. Get Meetings
 exports.getMeetings = async (req, res) => {
   try {
     const { email } = req.query; 
@@ -56,7 +55,6 @@ exports.getMeetings = async (req, res) => {
   }
 };
 
-// 2. Analyze Meeting
 exports.analyzeMeeting = async (req, res) => {
   try {
     const { title } = req.body;
@@ -75,7 +73,6 @@ exports.analyzeMeeting = async (req, res) => {
   }
 };
 
-// 3. Send Email
 exports.sendEmail = async (req, res) => {
   try {
     const { email, report } = req.body;

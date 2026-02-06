@@ -1,17 +1,14 @@
 const { Sequelize } = require('sequelize');
-const pg = require('pg'); // 👈 IMP: Manually import kiya
+const pg = require('pg'); 
 require('dotenv').config();
-
-// SSL check for Production vs Local
-const isProduction = process.env.NODE_ENV === 'production';
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
-  dialectModule: pg, // 👈 IMP: Vercel ko bataya ki driver ye hai
+  dialectModule: pg,
   logging: false,
   dialectOptions: {
     ssl: {
-      require: true, // Neon DB needs SSL
+      require: true, 
       rejectUnauthorized: false
     }
   }
