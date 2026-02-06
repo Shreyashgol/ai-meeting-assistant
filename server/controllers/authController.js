@@ -35,7 +35,6 @@ exports.googleCallback = async (req, res) => {
         picture,
         refreshToken: tokens.refresh_token
       });
-      console.log("🆕 New Postgres User Created");
     } else if (tokens.refresh_token) {
       user.refreshToken = tokens.refresh_token;
       await user.save();

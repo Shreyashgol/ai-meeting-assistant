@@ -21,12 +21,10 @@ connectDB();
 app.use('/auth', authRoutes); // Auth related URLs '/auth' se shuru honge
 app.use('/', meetingRoutes);  // Meeting related direct root pe hain (ya '/api' bhi laga sakte ho)
 
-// Basic Health Check
 app.get('/', (req, res) => {
   res.send('🚀 Anapan AI Server is Running (MVC Structure)');
 });
 
-// Start Server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
