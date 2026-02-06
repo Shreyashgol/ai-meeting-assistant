@@ -169,7 +169,7 @@ function HomeContent() {
        
         <div className="flex gap-3">
             <button onClick={handleLogin} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-1xl transition shadow-lg">
-              {userEmail ? `Synced as: ${userEmail}` : "Sync Calendar (Dev Mode)"}
+              {userEmail ? `Synced as: ${userEmail}` : "Sync Calendar"}
             </button>
         </div>
       </header>
