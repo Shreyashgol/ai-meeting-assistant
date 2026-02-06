@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react"; // 👈 Suspense import kiya
 import { useRouter, useSearchParams } from "next/navigation";
 import toast, { Toaster } from 'react-hot-toast';
 
-export default function Home() {
+// 👇 1. Sara Main Logic is naye component 'HomeContent' mein daal diya
+function HomeContent() {
   const [meetings, setMeetings] = useState([]);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [report, setReport] = useState(null);
@@ -11,21 +12,24 @@ export default function Home() {
   const [analyzing, setAnalyzing] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
   const [pdfDownloading, setPdfDownloading] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
   
   const [showInput, setShowInput] = useState(false);
   const [customTitle, setCustomTitle] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   const searchParams = useSearchParams();
-  const API_URL = "http://localhost:8000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"; // Env var use kiya safety ke liye
 
   const fetchMeetings = useCallback(async (emailToUse) => {
     const targetEmail = emailToUse || userEmail;
-    if (!targetEmail) return;
-
+    // Manual meetings ke liye email zaroori nahi, lekin sync ke liye hai
+    // Hum API call tabhi karenge jab email ho ya koi meeting id manual na ho
+    
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/meetings?email=${targetEmail}`);
+      // Agar email hai toh email bhejo, nahi toh seedha call (backend handle karega)
+      const url = targetEmail ? `${API_URL}/meetings?email=${targetEmail}` : `${API_URL}/meetings`;
+      const res = await fetch(url);
       const data = await res.json();
       if (Array.isArray(data)) setMeetings(data);
     } catch (err) {
@@ -40,15 +44,22 @@ export default function Home() {
 
     if (authStatus === "success" && emailFromUrl) {
       setUserEmail(emailFromUrl);
-      fetchMeetings(emailFromUrl); 
+      fetchMeetings(emailFromUrl);
       toast.success("Sync Successful!");
+      
+      // URL clean karne ke liye (Optional but good UX)
+      window.history.replaceState(null, '', '/');
     }
   }, [searchParams, fetchMeetings]);
 
   const handleLogin = async () => {
-    const res = await fetch(`${API_URL}/auth/url`);
-    const { url } = await res.json();
-    window.location.href = url;
+    try {
+        const res = await fetch(`${API_URL}/auth/url`);
+        const { url } = await res.json();
+        window.location.href = url;
+    } catch (error) {
+        toast.error("Backend connection failed");
+    }
   };
 
   const addManualMeeting = () => {
@@ -92,21 +103,21 @@ export default function Home() {
 
   const handleEmailSend = async () => {
     if (!report) return;
-    const userEmail = prompt("Enter email:", ""); 
-    if (!userEmail) return;
+    const emailInput = prompt("Enter email:", userEmail || ""); 
+    if (!emailInput) return;
 
     setEmailSending(true);
-    const toastId = toast.loading("Sending Email..."); 
+    const toastId = toast.loading("Sending Email...");
 
     try {
       const res = await fetch(`${API_URL}/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userEmail, report: report }),
+        body: JSON.stringify({ email: emailInput, report: report }),
       });
       
       if (res.ok) {
-        toast.success(`Email sent to ${userEmail} 🚀`, { id: toastId });
+        toast.success(`Email sent to ${emailInput} 🚀`, { id: toastId });
       } else {
         toast.error("Failed to send email ❌", { id: toastId });
       }
@@ -155,22 +166,21 @@ export default function Home() {
 
       <header className="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4 gap-4">
         <div>
-           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Anapan AI Sales Agent
           </h1>
-          <p className="text-1xl text-gray-400 mt-1">Automated Research & Meeting Prep</p>
+          <p className="text-xs text-gray-400 mt-1">Automated Research & Meeting Prep</p>
         </div>
        
         <div className="flex gap-3">
-          {!searchParams.get("auth") && (
-            <button onClick={handleLogin} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-1xl transition shadow-lg">
-              Sync Calendar
+            <button onClick={handleLogin} className="text-xs text-gray-400 hover:text-white underline">
+              {userEmail ? `Synced as: ${userEmail}` : "Sync Calendar (Dev Mode)"}
             </button>
-          )}
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[85vh]">
+        {/* LEFT COLUMN */}
         <div className="lg:col-span-4 bg-gray-800 rounded-xl p-4 flex flex-col h-full border border-gray-700">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold text-gray-200">📅 Schedule</h2>
@@ -213,6 +223,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* RIGHT COLUMN */}
         <div className="lg:col-span-8 bg-gray-800/50 rounded-xl p-6 h-full overflow-hidden flex flex-col justify-center relative">
           
           {!selectedMeeting ? (
@@ -238,6 +249,7 @@ export default function Home() {
                 </button>
               </div>
 
+              {/* Document Content */}
               <div className="overflow-y-auto flex-1 custom-scrollbar p-2 bg-gray-900/50 rounded-lg">
                 <div 
                   id="report-content" 
@@ -314,5 +326,14 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 👇 2. Main Component (Wrapper) with Suspense
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">Loading App...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
