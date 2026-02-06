@@ -1,9 +1,12 @@
 "use client";
-import { useState, useEffect, useCallback, Suspense } from "react"; // 👈 Suspense import kiya
+// 👇 1. Yeh line sabse important hai. Isse Build Error hat jayega.
+export const dynamic = "force-dynamic";
+
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast, { Toaster } from 'react-hot-toast';
 
-// 👇 1. Sara Main Logic is naye component 'HomeContent' mein daal diya
+// Main Content Component
 function HomeContent() {
   const [meetings, setMeetings] = useState([]);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
@@ -18,16 +21,12 @@ function HomeContent() {
   const [userEmail, setUserEmail] = useState("");
 
   const searchParams = useSearchParams();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"; // Env var use kiya safety ke liye
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   const fetchMeetings = useCallback(async (emailToUse) => {
     const targetEmail = emailToUse || userEmail;
-    // Manual meetings ke liye email zaroori nahi, lekin sync ke liye hai
-    // Hum API call tabhi karenge jab email ho ya koi meeting id manual na ho
-    
     setLoading(true);
     try {
-      // Agar email hai toh email bhejo, nahi toh seedha call (backend handle karega)
       const url = targetEmail ? `${API_URL}/meetings?email=${targetEmail}` : `${API_URL}/meetings`;
       const res = await fetch(url);
       const data = await res.json();
@@ -46,8 +45,6 @@ function HomeContent() {
       setUserEmail(emailFromUrl);
       fetchMeetings(emailFromUrl);
       toast.success("Sync Successful!");
-      
-      // URL clean karne ke liye (Optional but good UX)
       window.history.replaceState(null, '', '/');
     }
   }, [searchParams, fetchMeetings]);
@@ -329,7 +326,8 @@ function HomeContent() {
   );
 }
 
-// 👇 2. Main Component (Wrapper) with Suspense
+// Wrapper Component ki zaroorat nahi ab, direct export default Home kar diya hai.
+// Kyunki `force-dynamic` use kar liya.
 export default function Home() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">Loading App...</div>}>
