@@ -25,6 +25,12 @@ app.get('/', (req, res) => {
   res.send('🚀 Anapan AI Server is Running (MVC Structure)');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Local testing ke liye listen rakho, lekin export zaroori hai
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// 👇 Vercel ke liye ye line sabse important hai
+module.exports = app;
