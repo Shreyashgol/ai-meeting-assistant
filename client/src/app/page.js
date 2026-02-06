@@ -11,6 +11,7 @@ export default function Home() {
   const [analyzing, setAnalyzing] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
   const [pdfDownloading, setPdfDownloading] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   
   const [showInput, setShowInput] = useState(false);
   const [customTitle, setCustomTitle] = useState("");
@@ -18,22 +19,29 @@ export default function Home() {
   const searchParams = useSearchParams();
   const API_URL = "http://localhost:8000";
 
-  const fetchMeetings = useCallback(async () => {
+  const fetchMeetings = useCallback(async (emailToUse) => {
+    const targetEmail = emailToUse || userEmail;
+    if (!targetEmail) return;
+
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/meetings`);
+      const res = await fetch(`${API_URL}/meetings?email=${targetEmail}`);
       const data = await res.json();
       if (Array.isArray(data)) setMeetings(data);
     } catch (err) {
       console.error("Failed to fetch meetings", err);
     }
     setLoading(false);
-  }, []);
+  }, [userEmail, API_URL]);
 
   useEffect(() => {
-    if (searchParams.get("auth") === "success") {
-      fetchMeetings();
-      toast.success("Google Calendar Synced!"); 
+    const authStatus = searchParams.get("auth");
+    const emailFromUrl = searchParams.get("email");
+
+    if (authStatus === "success" && emailFromUrl) {
+      setUserEmail(emailFromUrl);
+      fetchMeetings(emailFromUrl); 
+      toast.success("Sync Successful!");
     }
   }, [searchParams, fetchMeetings]);
 
