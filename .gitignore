@@ -1,5 +1,2 @@
-git init
-echo "node_modules/" > .gitignore
-echo ".env" >> .gitignore
-git add .
-git commit -m "ready"
+node_modules
+.env
