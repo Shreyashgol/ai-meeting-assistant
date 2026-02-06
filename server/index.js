@@ -18,11 +18,21 @@ app.use(express.json());
 connectDB();
 
 // Routes Mounting
-app.use('/auth', authRoutes); // Auth related URLs '/auth' se shuru honge
-app.use('/', meetingRoutes);  // Meeting related direct root pe hain (ya '/api' bhi laga sakte ho)
+app.use('/auth', authRoutes);
+app.use('/api', meetingRoutes); // Changed to /api prefix
 
+// Root endpoint for health check
 app.get('/', (req, res) => {
-  res.send('🚀 Anapan AI Server is Running (MVC Structure)');
+  res.json({ 
+    status: 'success',
+    message: '🚀 Anapan AI Server is Running (MVC Structure)',
+    endpoints: {
+      auth: '/auth/url, /auth/google/callback',
+      meetings: '/api/meetings',
+      analyze: '/api/analyze',
+      email: '/api/send-email'
+    }
+  });
 });
 
 // Local testing ke liye listen rakho, lekin export zaroori hai

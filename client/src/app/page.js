@@ -27,7 +27,7 @@ function HomeContent() {
     const targetEmail = emailToUse || userEmail;
     setLoading(true);
     try {
-      const url = targetEmail ? `${API_URL}/meetings?email=${targetEmail}` : `${API_URL}/meetings`;
+      const url = targetEmail ? `${API_URL}/api/meetings?email=${targetEmail}` : `${API_URL}/api/meetings`;
       const res = await fetch(url);
       const data = await res.json();
       if (Array.isArray(data)) setMeetings(data);
@@ -84,7 +84,7 @@ function HomeContent() {
     const loadingToast = toast.loading(`Researching ${meeting.title}...`);
 
     try {
-      const res = await fetch(`${API_URL}/analyze`, {
+      const res = await fetch(`${API_URL}/api/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: meeting.title }),
@@ -107,7 +107,7 @@ function HomeContent() {
     const toastId = toast.loading("Sending Email...");
 
     try {
-      const res = await fetch(`${API_URL}/send-email`, {
+      const res = await fetch(`${API_URL}/api/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: emailInput, report: report }),
